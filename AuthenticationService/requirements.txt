@@ -5,6 +5,7 @@ SQLAlchemy==2.0.40
 asyncpg==0.30.0
 authx==1.4.2
 dotenv==0.9.9
+ruff==0.11.8
 
 
 ecdsa==0.19.1
