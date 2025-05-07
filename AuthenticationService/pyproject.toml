@@ -21,12 +21,12 @@ dependencies = [
 
 [tool.ruff]
 src = ["src"]
-lint.select = [
-    "E", # pycodestyle
-    "F", # pyflakes
-    "UP", # pyupgrade
-]
+include = ["src/**.py", "tests/**.py"]
+target-version = "py313"
 
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["D", "CPY001", "A005"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
