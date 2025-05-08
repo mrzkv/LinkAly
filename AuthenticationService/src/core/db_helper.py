@@ -6,13 +6,8 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import DeclarativeBase
 
 from src.core.config import DatabaseConfig, settings
-
-
-class Base(DeclarativeBase):
-    __abstract__ = True
 
 
 class DatabaseHelper:
