@@ -7,3 +7,5 @@ authx==1.4.2
 psycopg2-binary==2.9.10
 pydantic-settings==2.9.1
 ruff==0.11.8
+gunicorn==23.0.0
+uvicorn==0.34.2

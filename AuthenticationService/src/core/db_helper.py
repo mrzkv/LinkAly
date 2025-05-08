@@ -8,6 +8,8 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
+from src.core.config import DatabaseConfig, settings
+
 
 class Base(DeclarativeBase):
     __abstract__ = True
@@ -16,20 +18,15 @@ class Base(DeclarativeBase):
 class DatabaseHelper:
     def __init__(
             self,
-            url: str,
-            pool_size: int,
-            max_overflow: int,
-            *,
-            echo: bool = False,
-            echo_pool: bool = False,
+            config: DatabaseConfig,
     ) -> None:
 
         self.engine: AsyncEngine = create_async_engine(
-            url=url,
-            echo=echo,
-            echo_pool=echo_pool,
-            pool_size=pool_size,
-            max_overflow=max_overflow,
+            url=config.async_url,
+            echo=config.echo,
+            echo_pool=config.echo_pool,
+            pool_size=config.pool_size,
+            max_overflow=config.max_overflow,
         )
 
         self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
@@ -48,3 +45,6 @@ class DatabaseHelper:
             yield session
 
 
+db_helper = DatabaseHelper(
+    config=settings.db,
+)
