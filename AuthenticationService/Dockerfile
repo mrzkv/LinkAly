@@ -10,4 +10,4 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["bash", "-c", "python3 src/main.py"]
+CMD ["bash", "-c", "alembic upgrade head && python3 src/main.py"]
