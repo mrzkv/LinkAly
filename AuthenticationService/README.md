@@ -28,3 +28,12 @@ Authentication Service - part of ALSMS
 ### Entities:
  - Users
 
+
+### Tables: 
+#### Users
+
+| id    | login | email          | hashed_password | 
+|-------|-------|----------------|-----------------|
+| **1** | mrzkv | mrzkv@tech.com | {argon2-hash}   |
+| **2** | user  | user@email.com | {argon2-hash}   | 
+
