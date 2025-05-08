@@ -6,7 +6,11 @@ T = TypeVar("T")
 class AbstractRepository(ABC, Generic[T]):
 
     @abstractmethod
-    async def get(self, id: int) -> Optional[T]:
+    async def get(self, **kwargs) -> Optional[T]:
+        """
+        This function takes positional arguments
+        and executes the query with them.
+        """
         pass
 
     @abstractmethod
