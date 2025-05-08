@@ -1,0 +1,61 @@
+services:
+  pg:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "8312:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: root
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - auth-service-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+
+  pg_admin:
+    image: dpage/pgadmin4
+    container_name: pg-admin
+    ports:
+      - "8313:80"
+    depends_on:
+      pg:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: mrkzv@admin.tech
+      PGADMIN_DEFAULT_PASSWORD: root
+    networks:
+      - auth-service-network
+
+  auth_service:
+    build: .
+    container_name: auth-service
+    env_file:
+      src/.env
+    depends_on:
+      pg:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    networks:
+      - auth-service-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8000/v1/api/ping"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+
+
+volumes:
+  pgdata:
+    name: auth-service-pgdata
+
+networks:
+  auth-service-network:
+    name: auth-service-network
