@@ -52,10 +52,6 @@ class DatabaseConfig(BaseSettings):
     def async_url(self) -> str:
         return f"postgresql+asyncpg://{self.username}:{self.password}@{self.host}:{self.port}/{self.name}"
 
-    @property
-    def sync_url(self) -> str:
-        return f"postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
-
 class ApiVersion(BaseSettings):
     root: str # root prefix - /v1/api/...
 
