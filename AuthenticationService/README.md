@@ -24,6 +24,7 @@ Authentication Service - part of ALSMS
  5. Logging:
     - Grafana
     - Loki
+    - Promtail
 
 ### Entities:
  - Users

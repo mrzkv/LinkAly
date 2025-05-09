@@ -100,8 +100,6 @@ settings = Settings(
         JWT_TOKEN_LOCATION=["headers"],
         JWT_ACCESS_TOKEN_EXPIRES=timedelta(minutes=15),
         JWT_REFRESH_TOKEN_EXPIRES=timedelta(days=15),
-        JWT_ACCESS_COOKIE_NAME="x-access-token",
-        JWT_REFRESH_COOKIE_NAME="x-refresh-token",
         JWT_PUBLIC_KEY=env_settings.JWT_PUBLIC_KEY,
         JWT_PRIVATE_KEY=env_settings.JWT_PRIVATE_KEY,
     ),

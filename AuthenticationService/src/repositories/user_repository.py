@@ -1,4 +1,4 @@
-from sqlalchemy import delete, insert, select, text
+from sqlalchemy import delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repositories.base_repository import AbstractRepository
@@ -36,10 +36,10 @@ class UsersRepository(AbstractRepository[User]):
             raise ValueError("Invalid column")
 
         result = await self.session.execute(
-            text(f"SELECT * FROM users WHERE {column} = :value"),
-            {"value": value},
+            select(User)
+            .where(getattr(User, column) == value),
         )
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
 
     async def add(
