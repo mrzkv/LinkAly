@@ -16,7 +16,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from src.tables.base import Base
+from src.tables.base_table import Base
 from src.tables.user import User
 target_metadata = Base.metadata
 

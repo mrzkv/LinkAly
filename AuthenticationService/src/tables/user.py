@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import (
     VARCHAR,
 )
 
-from src.tables.base import Base
+from src.tables.base_table import Base
 
 
 class User(Base):

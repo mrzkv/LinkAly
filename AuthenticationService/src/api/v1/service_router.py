@@ -7,6 +7,7 @@ router = APIRouter(
     tags=["Service"],
 )
 
+# for application healthcheck
 @router.get("/ping")
 async def ping() -> None:
     return None

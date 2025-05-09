@@ -1,20 +1,19 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, List, Optional
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 
 class AbstractRepository(ABC, Generic[T]):
 
     @abstractmethod
-    async def get(self, **kwargs) -> Optional[T]:
+    async def get(self, **kwargs: dict) -> T | None:
         """
         This function takes positional arguments
         and executes the query with them.
         """
-        pass
 
     @abstractmethod
-    async def list(self, limit: int, offset: int) -> List[T]:
+    async def list(self, limit: int, offset: int) -> list[T]:
         pass
 
     @abstractmethod
@@ -22,5 +21,5 @@ class AbstractRepository(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    async def delete(self, id: int) -> None:
+    async def delete(self, user_id: int) -> None:
         pass

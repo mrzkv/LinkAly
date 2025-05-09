@@ -63,6 +63,7 @@ class DatabaseConfig(BaseSettings):
 
 class ApiVersion(BaseSettings):
     root: str # root prefix - /v1/api/...
+    auth: str
 
 class PrefixConfig(BaseSettings):
     v1: ApiVersion
@@ -107,6 +108,7 @@ settings = Settings(
     api=PrefixConfig(
         v1=ApiVersion(
             root="/v1/api",
+            auth="/v1/api/auth",
         ),
     ),
     log=LoggingConfig(
