@@ -25,12 +25,25 @@ class EnvConfig(BaseSettings):
     # Jwt config
     JWT_PUBLIC_KEY: str
     JWT_PRIVATE_KEY: str
+    # Smtp config
+    SMTP_LOGIN: str
+    SMTP_PASSWORD: str
+    SMTP_HOST: str
+    SMTP_PORT: int
+    SMTP_MAX_POOL: int
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=True,
     )
+
+class SmtpConfig(BaseSettings):
+    login: str
+    password: str
+    host: str
+    port: int
+    pool_size: int
 
 class DatabaseConfig(BaseSettings):
     # Connection string config
@@ -63,7 +76,7 @@ class DatabaseConfig(BaseSettings):
 
 class ApiVersion(BaseSettings):
     root: str # root prefix - /v1/api/...
-    auth: str
+    recovery: str
 
 class PrefixConfig(BaseSettings):
     v1: ApiVersion
@@ -80,6 +93,7 @@ class Settings(BaseSettings):
     jwt: AuthXConfig
     api: PrefixConfig
     log: LoggingConfig
+    smtp: SmtpConfig
 
 env_settings = EnvConfig()
 
@@ -105,11 +119,18 @@ settings = Settings(
     ),
     api=PrefixConfig(
         v1=ApiVersion(
-            root="/v1/api",
-            auth="/v1/api/auth",
+            root="/v1/api/auth",
+            recovery="/v1/api/auth/recovery",
         ),
     ),
     log=LoggingConfig(
         level=env_settings.LOG_LEVEL,
+    ),
+    smtp=SmtpConfig(
+        login=env_settings.SMTP_LOGIN,
+        password=env_settings.SMTP_PASSWORD,
+        host=env_settings.SMTP_HOST,
+        port=env_settings.SMTP_PORT,
+        pool_size=env_settings.SMTP_MAX_POOL,
     ),
 )
