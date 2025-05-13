@@ -10,10 +10,12 @@ from src.security.jwt import AuthJWT
 
 
 class UserService:
-    def __init__(self,
-                 session: AsyncSession,
-                 jwt: AuthJWT = AuthJWT(),
-                 hasher: ArgonHasher = ArgonHasher()) -> None:
+    def __init__(
+            self,
+            session: AsyncSession,
+            jwt: AuthJWT = AuthJWT(),
+            hasher: ArgonHasher = ArgonHasher(),
+    ) -> None:
         self.repository = UsersRepository(session)
         self.jwt = jwt
         self.hasher = hasher
@@ -28,6 +30,7 @@ class UserService:
         user_id = await self.repository.add(serialized_user)
         access_token = await self.jwt.create_access_token(str(user_id))
         refresh_token = await self.jwt.create_refresh_token(str(user_id))
+
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
@@ -43,6 +46,7 @@ class UserService:
             raise HTTPException(status_code=401, detail="Incorrect password or login")
         access_token = await self.jwt.create_access_token(str(db_user.id))
         refresh_token = await self.jwt.create_refresh_token(str(db_user.id))
+
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,

@@ -1,37 +1,24 @@
 from typing import Annotated
 
 from authx import RequestToken
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.user import JWKSResponse
 from src.core.config import settings
 from src.core.db_helper import db_helper
-from src.schemas.user import TokenResponse, UserCreate, UserLogin
+from src.dependencies.token_depends import get_refresh_token
+from src.schemas.user import JWKSResponse, TokenResponse, UserCreate, UserLogin
 from src.services.user_service import UserService
 
 router = APIRouter(
-    prefix=settings.api.v1.auth,
+    prefix=settings.api.v1.root,
     tags=["Users manager"],
 )
 
-
 async def get_service(
-        session: AsyncSession = Depends(db_helper.get_async_session),
+        session: Annotated[AsyncSession, Depends(db_helper.get_async_session)],
 ) -> UserService:
     return UserService(session)
-
-async def get_refresh_token(
-        x_refresh_token: Annotated[str | None, Header(alias="x-refresh-token")],
-) -> RequestToken:
-    if not x_refresh_token:
-        raise HTTPException(status_code=401,
-                            detail="Refresh token is required")
-    return RequestToken(
-        token=x_refresh_token,
-        type="refresh",
-        location=settings.jwt.JWT_TOKEN_LOCATION[0],
-    )
 
 @router.post("/register")
 async def register(

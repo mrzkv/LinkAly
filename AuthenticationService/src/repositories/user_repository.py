@@ -1,4 +1,4 @@
-from sqlalchemy import delete, insert, select
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repositories.base_repository import AbstractRepository
@@ -56,6 +56,21 @@ class UsersRepository(AbstractRepository[User]):
         )
         await self.session.commit()
         return result.scalar()
+
+    async def set_email(
+            self,
+            email: str,
+            user_id: int,
+    ) -> User:
+        result = await self.session.execute(
+            update(User)
+            .where(User.id == user_id)
+            .values(email=email)
+            .returning(User),
+        )
+        await self.session.commit()
+        return result.scalar()
+
 
 
     async def list(

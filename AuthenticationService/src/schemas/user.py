@@ -5,6 +5,10 @@ from fastapi import HTTPException
 from pydantic import BaseModel, field_validator
 
 
+class UserLogin(BaseModel):
+    password: str
+    login: str
+
 class UserCreate(BaseModel):
     login: str
     password: str
@@ -37,9 +41,6 @@ class UserCreate(BaseModel):
         return password
 
 
-class UserLogin(BaseModel):
-    password: str
-    login: str
 
 class TokenResponse(BaseModel):
     user_id: int
