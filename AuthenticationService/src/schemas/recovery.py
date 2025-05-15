@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 
 from src.utils.password_validator import check_password_vulnerability
 
+
 class EmailSetRequest(BaseModel):
     email: EmailStr
 
@@ -11,7 +12,7 @@ class PasswordChangeRequest(BaseModel):
     old_password: str
 
     @field_validator("new_password", "old_password")
-    def validate_password(cls, new, old):
+    def validate_password(cls, new: str, old: str) -> str:
         if new == old:
             raise HTTPException(
                 status_code=400,

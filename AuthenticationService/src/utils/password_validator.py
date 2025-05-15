@@ -1,5 +1,6 @@
 import re
 
+
 def check_password_vulnerability(password: str) -> str:
     """
     requires password with:
