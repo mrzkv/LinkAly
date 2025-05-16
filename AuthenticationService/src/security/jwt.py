@@ -24,12 +24,16 @@ class AuthJWT:
             self,
             user_id: str,
             email: str,
+            confirm_type: str,
     ) -> str:
         return self.jwt._create_token(
             uid=user_id,
             expiry=timedelta(minutes=20),
             type="confirm",
-            data={"email": email},
+            data={
+                "email": email,
+                "confirm_type": confirm_type,
+            },
         )
 
     async def verify_token(

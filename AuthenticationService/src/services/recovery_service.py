@@ -12,9 +12,11 @@ from src.repositories.user_repository import UsersRepository
 from src.schemas.recovery import (
     EmailSetRequest,
     EmailSetResponse,
+    ForgotPasswordResponse,
     NewEmailResponse,
     NewPasswordResponse,
     PasswordChangeRequest,
+    PasswordSetRequest,
 )
 from src.security.argon_hasher import ArgonHasher
 from src.security.jwt import AuthJWT
@@ -48,8 +50,11 @@ class RecoveryService:
             raise HTTPException(status_code=404, detail="User not found")
         if db_user.email:
             raise HTTPException(status_code=400, detail="Email already set")
-        confirm_token = await self.jwt.create_confirm_token(user_id=token_payload.sub,
-                                                            email=data.email)
+        confirm_token = await self.jwt.create_confirm_token(
+            user_id=token_payload.sub,
+            email=data.email,
+            confirm_type="verify_mail",
+        )
         verify_link = f"http://{env_settings.IP_ADDRESS}:{env_settings.PORT}{settings.api.v1.recovery}/set-email/{confirm_token}"
         body = (f"Hello, its LinkAly verification mail.\n"
                 f"Click this link to verify your email.\n"
@@ -85,6 +90,13 @@ class RecoveryService:
         except AttributeError as e:
             logger.info(f"Invalid token: {e}")
             raise HTTPException(status_code=401, detail="Invalid token")
+        try:
+            confirm_type = token_payload.confirm_type
+        except AttributeError as e:
+            logger.info(f"Invalid token: {e}")
+            raise HTTPException(status_code=401, detail="Invalid token")
+        if confirm_type != "verify_mail":
+            raise HTTPException(status_code=401, detail="Invalid token")
 
         await self.db_repository.set_email(
             email=email,
@@ -118,4 +130,62 @@ class RecoveryService:
             raise HTTPException(status_code=401, detail="Old password is invalid")
         new_hashed_password = await self.hasher.hash_password(data.new_password)
         await self.db_repository.set_password(db_user.id, new_hashed_password)
+        return NewPasswordResponse()
+
+    async def send_password_change_mail(
+            self,
+            data: PasswordChangeRequest,
+    ) -> ForgotPasswordResponse:
+        db_user = await self.db_repository.get(email=str(data.email))
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        confirm_token = await self.jwt.create_confirm_token(
+            user_id=str(db_user.id),
+            email=data.email,
+            confirm_type="password_change",
+        )
+        verify_link = f"http://{env_settings.IP_ADDRESS}:{env_settings.PORT}{settings.api.v1.recovery}/forgot-password/{confirm_token}"
+        body = (f"Hello, its LinkAly verification mail.\n"
+                f"Click this link to change your password.\n"
+                f"link: {verify_link}\n")
+        message = MIMEText(body, "plain", "utf-8")
+        message["From"] = settings.smtp.login
+        message["To"] = data.email
+        message["Subject"] = "verification email"
+        await self.smtp_repository.send(message)
+        return ForgotPasswordResponse()
+
+    async def change_forgotten_password(
+            self,
+            data: PasswordSetRequest,
+            confirm_token: str,
+    ) -> NewPasswordResponse:
+        confirm_token = RequestToken(
+            token=confirm_token,
+            type="access",
+            location="query",
+        )
+        try:
+            token_payload = await self.jwt.verify_token(
+                token=confirm_token,
+                verify_type=False,
+            )
+        except ValueError as e:
+            logger.info(f"Invalid token: {e}")
+            raise HTTPException(status_code=401, detail="Invalid token")
+        if token_payload.type != "confirm":
+            raise HTTPException(status_code=401, detail="Invalid token")
+        try:
+            confirm_type = token_payload.confirm_type
+        except AttributeError as e:
+            logger.info(f"Invalid token: {e}")
+            raise HTTPException(status_code=401, detail="Invalid token")
+        if confirm_type != "password_change":
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        hashed_password = await self.hasher.hash_password(data.password)
+        await self.db_repository.set_password(
+            user_id=int(token_payload.sub),
+            hashed_password=hashed_password,
+        )
         return NewPasswordResponse()

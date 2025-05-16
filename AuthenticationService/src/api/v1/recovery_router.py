@@ -12,9 +12,12 @@ from src.dependencies.token_depends import get_access_token
 from src.schemas.recovery import (
     EmailSetRequest,
     EmailSetResponse,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
     NewEmailResponse,
     NewPasswordResponse,
     PasswordChangeRequest,
+    PasswordSetRequest,
 )
 from src.services.recovery_service import RecoveryService
 
@@ -55,17 +58,17 @@ async def change_password(
 ) -> NewPasswordResponse:
     return await service.change_password(creds, access_token)
 
-# @router.post("/forgot-password")
-# async def forgot_password(
-#         creds: ...,
-#         service: Annotated[RecoveryService, Depends(get_service)],
-# ) -> ForgotPasswordResponse:
-#     return await service.
+@router.post("/forgot-password")
+async def forgot_password(
+        creds: ForgotPasswordRequest,
+        service: Annotated[RecoveryService, Depends(get_service)],
+) -> ForgotPasswordResponse:
+    return await service.send_password_change_mail(creds)
 
-# @router.post("/forgot-password/{code}")
-# async def confirm_password(
-#         creds: PasswordChangeRequest,
-#         code: Annotated[str, "Code from email"],
-# ) -> NewPasswordResponse:
-#     ...
-#
+@router.post("/forgot-password/{code}")
+async def confirm_password(
+        creds: PasswordSetRequest,
+        code: Annotated[str, "Code from email"],
+        service: Annotated[RecoveryService, Depends(get_service)],
+) -> NewPasswordResponse:
+    return await service.change_forgotten_password(creds, code)
