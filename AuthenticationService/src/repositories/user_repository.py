@@ -41,18 +41,16 @@ class UsersRepository(AbstractRepository[User]):
         )
         return result.scalars().first()
 
-
-    async def add(
+    async def set_password(
             self,
-            user: SerializedUser,
-    ) -> User.id:
+            user_id: int,
+            hashed_password: str,
+    ) -> User:
         result = await self.session.execute(
-            insert(User)
-            .values(
-                login=user.login,
-                hashed_password=user.hashed_password,
-            )
-            .returning(User.id),
+            update(User)
+            .where(User.id == user_id)
+            .values(hashed_password=hashed_password)
+            .returning(User),
         )
         await self.session.commit()
         return result.scalar()
@@ -70,6 +68,22 @@ class UsersRepository(AbstractRepository[User]):
         )
         await self.session.commit()
         return result.scalar()
+
+    async def add(
+            self,
+            user: SerializedUser,
+    ) -> User.id:
+        result = await self.session.execute(
+            insert(User)
+            .values(
+                login=user.login,
+                hashed_password=user.hashed_password,
+            )
+            .returning(User.id),
+        )
+        await self.session.commit()
+        return result.scalar()
+
 
 
 
