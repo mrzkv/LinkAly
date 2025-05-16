@@ -40,10 +40,16 @@ class UserService:
     async def login_user(self, user: UserLogin) -> TokenResponse:
         db_user = await self.repository.get(login=user.login)
         if not db_user:
-            raise HTTPException(status_code=401, detail="Incorrect password or login")
-        if not await self.hasher.verify_password(plain_password=user.password,
-                                                 hashed_password=db_user.hashed_password):
-            raise HTTPException(status_code=401, detail="Incorrect password or login")
+            raise HTTPException(status_code=401,
+                                detail="Incorrect password or login")
+        try:
+            if not await self.hasher.verify_password(plain_password=user.password,
+                                                     hashed_password=db_user.hashed_password):
+                raise HTTPException(status_code=401,
+                                    detail="Incorrect password or login")
+        except ValueError:
+            raise HTTPException(status_code=401,
+                                detail="Incorrect password or login")
         access_token = await self.jwt.create_access_token(str(db_user.id))
         refresh_token = await self.jwt.create_refresh_token(str(db_user.id))
 
