@@ -13,6 +13,8 @@ from src.schemas.recovery import (
     EmailSetRequest,
     EmailSetResponse,
     NewEmailResponse,
+    NewPasswordResponse,
+    PasswordChangeRequest,
 )
 from src.services.recovery_service import RecoveryService
 
@@ -36,7 +38,7 @@ async def set_email(
         access_token: Annotated[RequestToken, Depends(get_access_token)],
         service: Annotated[RecoveryService, Depends(get_service)],
 ) -> EmailSetResponse:
-    return await service.send_mail(creds, access_token)
+    return await service.send_verification_mail(creds, access_token)
 
 @router.get("/set-email/{code}")
 async def confirm_email(
@@ -45,12 +47,21 @@ async def confirm_email(
 ) -> NewEmailResponse:
     return await service.set_email(code)
 
+@router.post("/change-password")
+async def change_password(
+        creds: PasswordChangeRequest,
+        access_token: Annotated[RequestToken, Depends(get_access_token)],
+        service: Annotated[RecoveryService, Depends(get_service)],
+) -> NewPasswordResponse:
+    return await service.change_password(creds, access_token)
+
 # @router.post("/forgot-password")
 # async def forgot_password(
 #         creds: ...,
+#         service: Annotated[RecoveryService, Depends(get_service)],
 # ) -> ForgotPasswordResponse:
-#     ...
-#
+#     return await service.
+
 # @router.post("/forgot-password/{code}")
 # async def confirm_password(
 #         creds: PasswordChangeRequest,
@@ -58,9 +69,3 @@ async def confirm_email(
 # ) -> NewPasswordResponse:
 #     ...
 #
-# @router.post("/change-password")
-# async def change_password(
-#         creds: PasswordChangeRequest,
-#         access_token: Annotated[RequestToken, Depends(get_access_token)],
-# ) -> NewPasswordResponse:
-#     ...
