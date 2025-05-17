@@ -1,5 +1,7 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
+
+from src.middleware.prometheus import PrometheusMiddleware
 
 
 def register_middleware(app: FastAPI) -> None:
@@ -9,4 +11,7 @@ def register_middleware(app: FastAPI) -> None:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+    )
+    app.add_middleware(
+        PrometheusMiddleware,
     )
