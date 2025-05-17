@@ -17,7 +17,7 @@ docker compose up -d
 ~~~
 If you want to run service with smtp change .env.template file smtp settings
 
-#### When the launch is complete, you will be able to access the application and its infrastructure.  
+#### When the launch is complete, you will be able to access the application and his infrastructure.  
 
 **FastAPI** docs: [localhost:8000/docs](localhost:8000/docs)  
 
