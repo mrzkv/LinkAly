@@ -22,11 +22,11 @@ services:
     image: dpage/pgadmin4
     container_name: pg-admin
     ports:
-      - "8313:80"
+      - "4000:80"
     depends_on:
       - pg
     environment:
-      PGADMIN_DEFAULT_EMAIL: mrkzv@admin.tech
+      PGADMIN_DEFAULT_EMAIL: root@admin.tech
       PGADMIN_DEFAULT_PASSWORD: root
     networks:
       - auth-service-network
@@ -35,7 +35,7 @@ services:
     build: .
     container_name: auth-service
     env_file:
-      src/.env
+      src/.env.template
     depends_on:
       - pg
     ports:
@@ -97,8 +97,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=root
+      - GF_SECURITY_ADMIN_PASSWORD=root
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     volumes:
       - ./docker/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro

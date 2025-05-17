@@ -8,11 +8,40 @@ Authentication Service - part of ALSMS
 > once, then in main the configuration
 > is set to run on 1 machine
 
-### Responsibilities:
+## How to run:
+#### Windows(PowerShell)/Linux(Shell) without smtp:
+~~~
+git clone https://github.com/mrzkv/LinkAly.git -b auth-service
+cd LinkAly/AuthenticationService
+docker compose up -d
+~~~
+If you want to run service with smtp change .env.template file smtp settings
+
+#### When the launch is complete, you will be able to access the application and its infrastructure.  
+
+**FastAPI** docs: [localhost:8000/docs](localhost:8000/docs)  
+
+
+**Grafana**: [localhost:3000](localhost:3000)  
+username - root  
+password - root
+
+**PgAdmin**: [localhost:4000](localhost:4000)  
+username - root@admin.tech  
+password - root
+
+**Postgres**: jdbc:postgresql://0.0.0.0:8312/root   
+port: 8312  
+user: root  
+password: root  
+db: root  
+
+
+## Responsibilities:
     1. Manage Users
     2. Public keys distribution
 
-### Technologies:
+## Technologies:
  1. Programming languages:
     - Python
  2. Storages:
@@ -20,11 +49,12 @@ Authentication Service - part of ALSMS
  3. Authentication: 
     - JWT
  4. Deploy:
-    - Docker Compose
- 5. Logging:
+    - Docker compose
+ 5. Infrastructure:
     - Grafana
     - Loki
     - Promtail
+    - Prometheus
 
 ### Entities:
  - Users
