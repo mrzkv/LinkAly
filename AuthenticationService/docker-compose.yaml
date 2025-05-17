@@ -24,8 +24,7 @@ services:
     ports:
       - "8313:80"
     depends_on:
-      pg:
-        condition: service_healthy
+      - pg
     environment:
       PGADMIN_DEFAULT_EMAIL: mrkzv@admin.tech
       PGADMIN_DEFAULT_PASSWORD: root
@@ -38,23 +37,85 @@ services:
     env_file:
       src/.env
     depends_on:
-      pg:
-        condition: service_healthy
+      - pg
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8000/v1/api/auth/health || exit 1"]
+      interval: 1s
+      retries: 10
+      start_period: 10s
+      timeout: 2s
     networks:
       - auth-service-network
-    healthcheck:
-      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8000/v1/api/ping"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 5s
 
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    depends_on:
+      - auth_service
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./docker/loki/loki-config.yaml:/etc/loki/local-config.yaml
+    networks:
+      - auth-service-network
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    depends_on:
+      - auth_service
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker/promtail/promtail-config.yaml:/etc/promtail/config.yml
+    networks:
+      - auth-service-network
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    depends_on:
+      - auth_service
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheusdata:/prometheus
+    networks:
+      - auth-service-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+      - loki
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    volumes:
+      - ./docker/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning/dashboards:ro
+      - grafanadata:/var/lib/grafana
+    networks:
+      - auth-service-network
 
 volumes:
   pgdata:
     name: auth-service-pgdata
+  grafanadata:
+    name: auth-service-grafanadata
+  prometheusdata:
+    name: auth-service-prometheusdata
+
 
 networks:
   auth-service-network:
