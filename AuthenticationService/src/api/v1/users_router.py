@@ -6,8 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
 from src.core.db_helper import db_helper
-from src.dependencies.token_depends import get_refresh_token
-from src.schemas.user import JWKSResponse, TokenResponse, UserCreate, UserLogin
+from src.dependencies.token_depends import get_access_token, get_refresh_token
+from src.schemas.user import (
+    JWKSResponse,
+    TokenResponse,
+    UserCreate,
+    UserLogin,
+    UserMe,
+)
 from src.services.user_service import UserService
 
 router = APIRouter(
@@ -47,3 +53,10 @@ async def refresh(
 @router.get("/jwks")
 async def json_web_key_set() -> JWKSResponse:
     return JWKSResponse(public_key=settings.jwt.JWT_PUBLIC_KEY)
+
+@router.get("/me", response_model_exclude_none=True)
+async def me(
+        access_token: Annotated[RequestToken | None, Depends(get_access_token)],
+        service: Annotated[UserService, Depends(get_service)],
+) -> UserMe:
+    return await service.get_user_profile(access_token)

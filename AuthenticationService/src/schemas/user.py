@@ -24,8 +24,6 @@ class UserCreate(BaseModel):
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
-
-
 class TokenResponse(BaseModel):
     user_id: int
     access_token: str
@@ -38,3 +36,7 @@ class SerializedUser(BaseModel):
     login: str
     hashed_password: str
 
+class UserMe(BaseModel):
+    id: int
+    login: str
+    email: str | None = None

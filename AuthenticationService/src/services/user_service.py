@@ -4,7 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.logging_promtail import logger
 from src.repositories.user_repository import UsersRepository
-from src.schemas.user import SerializedUser, TokenResponse, UserCreate, UserLogin
+from src.schemas.user import (
+    SerializedUser,
+    TokenResponse,
+    UserCreate,
+    UserLogin,
+    UserMe,
+)
 from src.security.argon_hasher import ArgonHasher
 from src.security.jwt import AuthJWT
 
@@ -76,4 +82,23 @@ class UserService:
             access_token=access_token,
             refresh_token=refresh_token.token,
             user_id=db_user.id,
+        )
+
+    async def get_user_profile(
+            self,
+            access_token: RequestToken,
+    ) -> UserMe:
+        try:
+            token_payload = await self.jwt.verify_token(access_token)
+        except ValueError as e:
+            logger.info(f"Invalid token: {e}")
+            raise HTTPException(status_code=401, detail="Invalid token")
+        db_user = await self.repository.get(id=int(token_payload.sub))
+        if not db_user:
+            logger.error(f"Invalid user in token: {token_payload}")
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return UserMe(
+            id=db_user.id,
+            login=db_user.login,
+            email=db_user.email,
         )
