@@ -1,20 +1,20 @@
 import uvicorn
 from fastapi import FastAPI
 
-from src.core.config import settings
-from src.core.lifespan import lifespan, register_middlewares, register_routers
+from src.api.general_router import register_routers
+from src.core.lifespan import lifespan
 
 app = FastAPI(lifespan=lifespan)
 
-register_middlewares(app)
 register_routers(app)
+
 
 def start_server() -> None:
     uvicorn.run(
         app="main:app",
-        host=settings.server.host,
-        port=settings.server.port,
-        workers=settings.server.workers,
+        host="0.0.0.0",
+        port=8000,
+        workers=3,
     )
 
 if __name__ == "__main__":
