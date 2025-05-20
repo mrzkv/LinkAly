@@ -2,7 +2,7 @@ Analytic Link Shortening Micro-Services (ALSMS)
 -----
 ### Business-Plan:
  - **Target**: Create ALSMS
- - **Solving problem**: Lack of a link shortener with convenient analytics on the market
+ - **Solving problem**: Analytic for users, who need statistics of redirects
  - **Growth points**: Add more analytic features.
 
 ### Technologies:
