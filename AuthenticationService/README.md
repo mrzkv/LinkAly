@@ -19,14 +19,14 @@ If you want to run service with smtp change .env.template file smtp settings
 
 #### When the launch is complete, you will be able to access the application and his infrastructure.  
 
-**FastAPI** docs: [localhost:8000/docs](localhost:8000/docs)  
+**FastAPI** docs: [localhost:8000/docs](http://localhost:8000/docs)  
 
 
-**Grafana**: [localhost:3000](localhost:3000)  
+**Grafana**: [localhost:3000](http://localhost:3000)  
 username - root  
 password - root
 
-**PgAdmin**: [localhost:4000](localhost:4000)  
+**PgAdmin**: [localhost:4000](http://localhost:4000)  
 username - root@admin.tech  
 password - root
 
