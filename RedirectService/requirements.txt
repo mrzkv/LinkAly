@@ -5,3 +5,8 @@ asyncpg==0.30.0
 gunicorn==23.0.0
 uvicorn==0.34.2
 pydantic-settings==2.9.1
+pydantic[email]==2.11.4
+prometheus-client==0.22.0
+prometheus-fastapi-instrumentator==7.1.0
+python-dotenv==1.1.0
+dotenv==0.9.9

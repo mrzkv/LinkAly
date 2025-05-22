@@ -28,7 +28,7 @@ class DatabaseConfig(BaseSettings):
 
     @property
     def async_url(self) -> str:
-        return f"postgresql+asyncpg://{self.username}:{self.password}@{self.host}:{self.port}/{self.name}"
+        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
     model_config = SettingsConfigDict(
         env_prefix="POSTGRES_",
@@ -37,13 +37,6 @@ class DatabaseConfig(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
-
-
-class ApiVersionConfig(BaseSettings):
-    root: str
-
-class PrefixConfig(BaseSettings):
-    v1: ApiVersionConfig
 
 class LoggingConfig(BaseSettings):
     level: str
@@ -60,20 +53,46 @@ class LoggingConfig(BaseSettings):
     def level_value(self) -> int:
         return logging.getLevelNamesMapping().get(self.level.upper(), logging.DEBUG)
 
+class CorsConfig(BaseSettings):
+    origins: list[str]
+    methods: list[str]
+    headers: list[str]
+    credentials: list[str]
+
+class MiddlewareConfig(BaseSettings):
+    cors: CorsConfig
+
+
+class ApiVersionConfig(BaseSettings):
+    root: str
+
+class PrefixConfig(BaseSettings):
+    v1: ApiVersionConfig
+
+
 class Settings(BaseSettings):
     server: ServerConfig
     db: DatabaseConfig
     api: PrefixConfig
     log: LoggingConfig
+    middleware: MiddlewareConfig
 
 settings = Settings(
     server=ServerConfig(),
     db=DatabaseConfig(),
     api=PrefixConfig(
         v1=ApiVersionConfig(
-            root="/v1/api",
+            root="/v1/api/redirect",
         ),
     ),
     log=LoggingConfig(),
+    middleware=MiddlewareConfig(
+        cors=CorsConfig(
+            origins=["*"],
+            methods=["*"],
+            headers=["*"],
+            credentials=["*"],
+        ),
+    ),
 
 )
