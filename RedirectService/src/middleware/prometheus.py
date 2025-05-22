@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.core.config import settings
-from src.middleware.base import AbstractMiddleware
+from src.middleware.base import BaseMiddleware
 
 
-class Prometheus(AbstractMiddleware):
+class Prometheus(BaseMiddleware):
     def __init__(
             self,
             app: FastAPI,

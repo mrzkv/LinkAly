@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 
-class AbstractMiddleware:
+class BaseMiddleware:
 
     @abstractmethod
     def install(self) -> None:
