@@ -15,7 +15,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = None
+from src.tables.base import Base
+from src.tables.urlpair import UrlPair
+target_metadata = Base.metadata
+
 
 from src.core.config import settings
 config.set_main_option("sqlalchemy.url", settings.db.async_url)
