@@ -65,6 +65,7 @@ class MiddlewareConfig(BaseSettings):
 
 class ApiVersionConfig(BaseSettings):
     root: str
+    url_manager: str
 
 class PrefixConfig(BaseSettings):
     v1: ApiVersionConfig
@@ -83,6 +84,7 @@ settings = Settings(
     api=PrefixConfig(
         v1=ApiVersionConfig(
             root="/v1/api/redirect",
+            url_manager="/v1/api/redirect/manager"
         ),
     ),
     log=LoggingConfig(),

@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.core.config import CorsConfig, settings
-from src.middleware.base import BaseMiddleware
+from src.middleware.base import AbstractMiddleware
 
 
-class CORS(BaseMiddleware):
+class CORS(AbstractMiddleware):
     def __init__(
             self,
             app: FastAPI,
