@@ -33,7 +33,7 @@ class UrlDAO(AbstractDAO):
             raise ValueError("Only 1 positional argument is allowed")
 
         column, value = next(iter(kwargs.items()))
-        allowed_columns = {"short_url", "real_url", "id", "creator_id"}
+        allowed_columns = {"short_url", "real_url", "id"}
 
         if column not in allowed_columns:
             raise ValueError("Invalid column")
@@ -42,7 +42,7 @@ class UrlDAO(AbstractDAO):
             select(UrlPair)
             .where(getattr(UrlPair, column) == value),
         )
-        return result.scalars().all()
+        return result.scalars().first()
 
     async def add(
             self,
@@ -53,7 +53,6 @@ class UrlDAO(AbstractDAO):
             .values(
                 short_url=data.short_url,
                 real_url=data.real_url,
-                creator_id=data.creator_id,
             )
             .returning(UrlPair),
         )

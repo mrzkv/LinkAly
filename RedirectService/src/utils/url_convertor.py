@@ -9,12 +9,13 @@ def url_convertor(url: str) -> str:
     """
 
     # removing spaces
-    url = url.strip()
+    url = url.lstrip()
+    url = url.rstrip()
+
     # removing http(-s)://
     if url.startswith("http://"):
         url = url.replace("http://", "", 1)
     elif url.startswith("https://"):
         url = url.replace("https://", "", 1)
-
     return url
 
