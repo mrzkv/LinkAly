@@ -1,4 +1,5 @@
 import logging
+import httpx
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -7,6 +8,7 @@ class ServerConfig(BaseSettings):
     host: str
     port: int
     workers: int
+    public_key_distributor_url: str
 
     model_config = SettingsConfigDict(
         env_prefix="SERVER_",
@@ -62,7 +64,6 @@ class CorsConfig(BaseSettings):
 class MiddlewareConfig(BaseSettings):
     cors: CorsConfig
 
-
 class ApiVersionConfig(BaseSettings):
     root: str
     url_manager: str
@@ -70,6 +71,12 @@ class ApiVersionConfig(BaseSettings):
 class PrefixConfig(BaseSettings):
     v1: ApiVersionConfig
 
+class JWTConfig(BaseSettings):
+
+    @property
+    def public_key(self) -> str:
+        with httpx.Client() as client:
+            client.get()
 
 class Settings(BaseSettings):
     server: ServerConfig
@@ -84,7 +91,7 @@ settings = Settings(
     api=PrefixConfig(
         v1=ApiVersionConfig(
             root="/v1/api/redirect",
-            url_manager="/v1/api/redirect/manager"
+            url_manager="/v1/api/redirect/manager",
         ),
     ),
     log=LoggingConfig(),
@@ -96,5 +103,4 @@ settings = Settings(
             credentials=["*"],
         ),
     ),
-
 )

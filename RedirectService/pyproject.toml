@@ -30,7 +30,9 @@ target-version = "py313"
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "D", "BLE001", "ARG001"
+    "D", "BLE001", "ARG001",
+    "TRY003", "EM101", "N805",
+    "B008"
 ]
 
 [build-system]
