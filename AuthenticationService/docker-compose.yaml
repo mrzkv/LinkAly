@@ -1,7 +1,7 @@
 services:
   pg:
     image: postgres:latest
-    container_name: postgres
+    container_name: auth-postgres
     ports:
       - "8312:5432"
     environment:
@@ -17,19 +17,6 @@ services:
       interval: 3s
       retries: 10
       timeout: 2s
-
-  pg_admin:
-    image: dpage/pgadmin4
-    container_name: pg-admin
-    ports:
-      - "4000:80"
-    depends_on:
-      - pg
-    environment:
-      PGADMIN_DEFAULT_EMAIL: root@admin.tech
-      PGADMIN_DEFAULT_PASSWORD: root
-    networks:
-      - auth-service-network
 
   auth_service:
     build: .
@@ -51,7 +38,7 @@ services:
 
   loki:
     image: grafana/loki:latest
-    container_name: loki
+    container_name: auth-loki
     depends_on:
       - auth_service
     ports:
@@ -63,7 +50,7 @@ services:
 
   promtail:
     image: grafana/promtail:latest
-    container_name: promtail
+    container_name: auth-promtail
     depends_on:
       - auth_service
     command: -config.file=/etc/promtail/config.yml
@@ -77,7 +64,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: prometheus
+    container_name: auth-prometheus
     depends_on:
       - auth_service
     ports:
@@ -90,7 +77,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
+    container_name: auth-grafana
     depends_on:
       - prometheus
       - loki
