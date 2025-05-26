@@ -1,9 +1,9 @@
 services:
   pg:
     image: postgres:latest
-    container_name: postgres
+    container_name: redirect-postgres
     ports:
-      - "8312:5432"
+      - "8314:5432"
     env_file:
       - src/.env
     volumes:
@@ -24,7 +24,7 @@ services:
     depends_on:
       - pg
     ports:
-      - "8000:8000"
+      - "8001:8000"
     healthcheck:
       test: [ "CMD-SHELL", "curl", "-f", "http://localhost:8000/v1/api/redirect/health || exit 1" ]
       interval: 1s
@@ -36,11 +36,11 @@ services:
 
   loki:
     image: grafana/loki:latest
-    container_name: loki
+    container_name: redirect-loki
     depends_on:
       - redirect_service
     ports:
-      - "3100:3100"
+      - "3101:3100"
     volumes:
       - ./docker/loki/loki-config.yaml:/etc/loki/local-config.yaml
     networks:
@@ -48,7 +48,7 @@ services:
 
   promtail:
       image: grafana/promtail:latest
-      container_name: promtail
+      container_name: redirect-promtail
       depends_on:
         - redirect_service
       command: -config.file=/etc/promtail/config.yml
@@ -61,11 +61,11 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: prometheus
+    container_name: redirect-prometheus
     depends_on:
       - redirect_service
     ports:
-      - "9090:9090"
+      - "9091:9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheusdata:/prometheus
@@ -74,12 +74,12 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana
+    container_name: redirect-grafana
     depends_on:
       - prometheus
       - loki
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=root
       - GF_SECURITY_ADMIN_PASSWORD=root

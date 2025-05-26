@@ -53,6 +53,7 @@ class UrlDAO(AbstractDAO):
             .values(
                 short_url=data.short_url,
                 real_url=data.real_url,
+                creator_id=data.creator_id,
             )
             .returning(UrlPair),
         )

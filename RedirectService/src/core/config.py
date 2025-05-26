@@ -1,7 +1,7 @@
 import logging
-import httpx
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from src.utils.public_key_reciever import get_public_key
 
 
 class ServerConfig(BaseSettings):
@@ -9,6 +9,7 @@ class ServerConfig(BaseSettings):
     port: int
     workers: int
     public_key_distributor_url: str
+    default_public_key: str
 
     model_config = SettingsConfigDict(
         env_prefix="SERVER_",
@@ -72,11 +73,7 @@ class PrefixConfig(BaseSettings):
     v1: ApiVersionConfig
 
 class JWTConfig(BaseSettings):
-
-    @property
-    def public_key(self) -> str:
-        with httpx.Client() as client:
-            client.get()
+    public_key: str
 
 class Settings(BaseSettings):
     server: ServerConfig
@@ -103,4 +100,13 @@ settings = Settings(
             credentials=["*"],
         ),
     ),
+)
+
+try:
+    public_key = get_public_key()
+except Exception as e:
+    public_key = settings.server.default_public_key
+
+security = JWTConfig(
+    public_key=public_key,
 )
