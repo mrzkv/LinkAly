@@ -1,12 +1,13 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from starlette.responses import RedirectResponse
 
 from src.core.config import settings
-from src.dependencies.service import get_url_service
 from src.dependencies.auth import get_user_id_by_access_token
-from src.services.url import UrlService
+from src.dependencies.service import get_url_service
 from src.schemas.url import NewUrlPair, SuccessCreateUrlPair
+from src.services.url import UrlService
 
 router = APIRouter(
     prefix=settings.api.v1.url_manager,
