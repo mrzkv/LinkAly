@@ -1,9 +1,9 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.dao.url import UrlDAO
-
-from src.schemas.url import NewUrlPair, SuccessCreateUrlPair, SerializedUrlPair
-
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.dao.url import UrlDAO
+from src.schemas.url import NewUrlPair, SerializedUrlPair, SuccessCreateUrlPair
+
 
 class UrlService:
     def __init__(
@@ -31,7 +31,7 @@ class UrlService:
                 short_url=data.short_url,
                 real_url=data.short_url,
                 creator_id=creator_id,
-            )
+            ),
         )
         return SuccessCreateUrlPair(
             short_url=url_pair.short_url,

@@ -1,9 +1,5 @@
-from pydantic import (
-    BaseModel,
-    Field,
-    field_serializer,
-    field_validator
-)
+from pydantic import BaseModel, Field, field_serializer, field_validator
+
 from src.utils.url_convertor import url_convertor
 
 

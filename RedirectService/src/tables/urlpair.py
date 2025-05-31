@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Index
-from sqlalchemy.dialects.postgresql import VARCHAR, INTEGER
+from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR
 
 from src.tables.base import Base
 
