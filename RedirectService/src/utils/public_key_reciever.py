@@ -1,13 +1,16 @@
-import httpx
+import requests
 
-
-def get_public_key(url: str) -> str:
+def get_public_key(url: str, default: str) -> str:
     """
     Function to get public key from auth-service
 
-    :param url:
+    :param default: Return default public key if cant get key from auth-service
+    :param url: Url to endpoint with public key ( JWKS )
     :return: public_key
     """
-    with httpx.Client() as client:
-        response = client.get(url=url)
+    try:
+        response = requests.get(url)
         return response.json()["public_key"]
+
+    except Exception as e:
+        return default
