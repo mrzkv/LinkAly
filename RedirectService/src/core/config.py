@@ -2,7 +2,6 @@ import logging
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from src.core.logging_promtail import logger
 from src.utils.public_key_reciever import get_public_key
 
 
@@ -104,12 +103,10 @@ settings = Settings(
     ),
 )
 
-try:
-    public_key = get_public_key()
-except Exception:
-    logger.warning("Public key not found, using default values")
-    public_key = settings.server.default_public_key
 
 security = JWTConfig(
-    public_key=public_key,
+    public_key=get_public_key(
+        settings.server.public_key_distributor_url,
+        settings.server.default_public_key,
+    ),
 )
