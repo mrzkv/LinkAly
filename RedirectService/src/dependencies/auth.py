@@ -17,15 +17,15 @@ async def get_user_id_by_access_token(
         raise HTTPException(status_code=401)
     try:
         token_payload = jwt.decode(
-            jwt=access_token,
-            key=security.public_key,
+            access_token,
+            security.public_key,
             algorithms=["RS256"],
         )
     except jwt.ExpiredSignatureError as e:
         logger.debug(f"Expired token: {access_token}")
         raise HTTPException(status_code=401) from e
     except jwt.InvalidTokenError as e:
-        logger.info(f"Invalid token: {access_token}")
+        logger.info(f"Invalid token: {access_token}, {e}")
         raise HTTPException(status_code=401) from e
 
     try:
