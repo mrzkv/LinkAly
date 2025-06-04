@@ -1,11 +1,10 @@
 from email.mime.text import MIMEText
 
 import aiosmtplib
-from authx import RequestToken
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import env_settings, settings
+from src.core.config import settings
 from src.core.logging_promtail import logger
 from src.repositories.smtp_repository import SMTPRepository
 from src.repositories.user_repository import UsersRepository
@@ -19,7 +18,7 @@ from src.schemas.recovery import (
     PasswordSetRequest,
 )
 from src.security.argon_hasher import ArgonHasher
-from src.security.jwt import AuthJWT
+from src.security.jwt import AuthJWT, TokenPayload
 
 
 class RecoveryService:
@@ -27,35 +26,28 @@ class RecoveryService:
             self,
             db_session: AsyncSession,
             smtp_conn: aiosmtplib.SMTP,
-            jwt: AuthJWT = AuthJWT(),
-            hasher: ArgonHasher = ArgonHasher(),
     ) -> None:
         self.db_repository = UsersRepository(db_session)
         self.smtp_repository = SMTPRepository(smtp_conn)
-        self.jwt = jwt
-        self.hasher = hasher
+        self.hasher = ArgonHasher()
+        self.jwt = AuthJWT(settings.jwt)
 
     async def send_verification_mail(
             self,
             data: EmailSetRequest,
-            access_token: RequestToken,
+            token_payload: TokenPayload,
     ) -> EmailSetResponse:
-        try:
-            token_payload = await self.jwt.verify_token(access_token)
-        except ValueError as e:
-            logger.info(f"Invalid token: {e}")
-            raise HTTPException(status_code=401, detail="Invalid token")
         db_user = await self.db_repository.get(id=int(token_payload.sub))
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
         if db_user.email:
             raise HTTPException(status_code=400, detail="Email already set")
-        confirm_token = await self.jwt.create_confirm_token(
+        confirm_token = self.jwt.create_confirm_token(
             user_id=token_payload.sub,
             email=data.email,
             confirm_type="verify_mail",
         )
-        verify_link = f"http://{env_settings.IP_ADDRESS}:{env_settings.PORT}{settings.api.v1.recovery}/set-email/{confirm_token}"
+        verify_link = f"http://{settings.server.host}:{settings.server.port}{settings.api.v1.recovery}/set-email/{confirm_token}"
         body = (f"Hello, its LinkAly verification mail.\n"
                 f"Click this link to verify your email.\n"
                 f"link: {verify_link}\n")
@@ -70,54 +62,28 @@ class RecoveryService:
             self,
             confirm_token: str,
     ) -> NewEmailResponse:
-        confirm_token = RequestToken(
-            token=confirm_token,
-            type="access",
-            location="query",
-        )
         try:
-            token_payload = await self.jwt.verify_token(
-                token=confirm_token,
-                verify_type=False,
-            )
-        except ValueError as e:
-            logger.info(f"Invalid token: {e}")
+            token_payload = self.jwt.verify_token(confirm_token)
+        except ValueError:
+            logger.info(f"Invalid token: {confirm_token}")
+            raise HTTPException(status_code=404)
+
+        if token_payload.typ != "confirm":
             raise HTTPException(status_code=401, detail="Invalid token")
-        if token_payload.type != "confirm":
-            raise HTTPException(status_code=401, detail="Invalid token")
-        try:
-            email=token_payload.email
-        except AttributeError as e:
-            logger.info(f"Invalid token: {e}")
-            raise HTTPException(status_code=401, detail="Invalid token")
-        try:
-            confirm_type = token_payload.confirm_type
-        except AttributeError as e:
-            logger.info(f"Invalid token: {e}")
-            raise HTTPException(status_code=401, detail="Invalid token")
-        if confirm_type != "verify_mail":
+        if token_payload.confirm_type != "verify_mail":
             raise HTTPException(status_code=401, detail="Invalid token")
 
         await self.db_repository.set_email(
-            email=email,
+            email=token_payload.email,
             user_id=int(token_payload.sub),
         )
-
-        return NewEmailResponse(email=email)
+        return NewEmailResponse(email=token_payload.email)
 
     async def change_password(
             self,
             data: PasswordChangeRequest,
-            access_token: RequestToken,
+            token_payload: TokenPayload,
     ) -> NewPasswordResponse:
-        try:
-            token_payload = await self.jwt.verify_token(
-                token=access_token,
-            )
-        except ValueError as e:
-            logger.info(f"Invalid token: {e}")
-            raise HTTPException(status_code=401, detail="Invalid token")
-
         db_user = await self.db_repository.get(id=int(token_payload.sub))
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -160,11 +126,6 @@ class RecoveryService:
             data: PasswordSetRequest,
             confirm_token: str,
     ) -> NewPasswordResponse:
-        confirm_token = RequestToken(
-            token=confirm_token,
-            type="access",
-            location="query",
-        )
         try:
             token_payload = await self.jwt.verify_token(
                 token=confirm_token,
@@ -173,14 +134,9 @@ class RecoveryService:
         except ValueError as e:
             logger.info(f"Invalid token: {e}")
             raise HTTPException(status_code=401, detail="Invalid token")
-        if token_payload.type != "confirm":
+        if token_payload.typ != "confirm":
             raise HTTPException(status_code=401, detail="Invalid token")
-        try:
-            confirm_type = token_payload.confirm_type
-        except AttributeError as e:
-            logger.info(f"Invalid token: {e}")
-            raise HTTPException(status_code=401, detail="Invalid token")
-        if confirm_type != "password_change":
+        if token_payload.confirm_type != "password_change":
             raise HTTPException(status_code=401, detail="Invalid token")
 
         hashed_password = await self.hasher.hash_password(data.password)

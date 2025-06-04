@@ -1,42 +1,9 @@
 import logging
 from datetime import timedelta
 
-from authx import AuthXConfig
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
-class EnvConfig(BaseSettings):
-    # IP_ADDRESS / PORT
-    IP_ADDRESS: str
-    PORT: int
-    # Connection string config
-    DB_USERNAME: str
-    DB_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: int
-    DB_NAME: str
-    # Session config
-    POOL_SIZE: int
-    MAX_OVERFLOW: int
-    # Uvicorn workers
-    UVICORN_WORKERS: int
-    # Logging config
-    LOG_LEVEL: str
-    # Jwt config
-    JWT_PUBLIC_KEY: str
-    JWT_PRIVATE_KEY: str
-    # Smtp config
-    SMTP_LOGIN: str
-    SMTP_PASSWORD: str
-    SMTP_HOST: str
-    SMTP_PORT: int
-    SMTP_MAX_POOL: int
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-    )
 
 class SmtpConfig(BaseSettings):
     login: str
@@ -45,30 +12,34 @@ class SmtpConfig(BaseSettings):
     port: int
     pool_size: int
 
+    model_config = SettingsConfigDict(
+        env_prefix="SMTP_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+
+    )
+
 class DatabaseConfig(BaseSettings):
     # Connection string config
+    host: str
     username: str
     password: str
-    host: str
-    port: int
     name: str
+    port: int
 
     # Session config
     pool_size: int
     max_overflow: int
 
-    # Echo config
-    echo: bool
-    echo_pool: bool
-
-    # Naming convention
-    naming_convention: dict[str, str] = {
-        "ix": "ix_%(column_0_label)s",
-        "uq": "uq_%(table_name)s_%(column_0_N_name)s",
-        "ck": "ck_%(table_name)s_%(constraint_name)s",
-        "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-        "pk": "pk_%(table_name)s",
-    }
+    model_config = SettingsConfigDict(
+        env_prefix="DB_",
+        env_file=".env",
+        case_sensitive=False,
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     @property
     def async_url(self) -> str:
@@ -78,8 +49,33 @@ class ApiVersion(BaseSettings):
     root: str # root prefix - /v1/api/...
     recovery: str
 
+    model_config = SettingsConfigDict(
+        env_prefix="PATH_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
 class PrefixConfig(BaseSettings):
     v1: ApiVersion
+
+class JWTConfig(BaseSettings):
+    access_token_expires: int
+    refresh_token_expires: int
+    confirm_token_expires: int
+    public_key: str
+    private_key: str
+    issuer: str
+
+    model_config = SettingsConfigDict(
+        env_prefix="JWT_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
 
 class LoggingConfig(BaseSettings):
     level: str
@@ -88,49 +84,56 @@ class LoggingConfig(BaseSettings):
     def level_value(self) -> int:
         return logging.getLevelNamesMapping().get(self.level.upper(), logging.DEBUG)
 
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="LOGGING_",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+class CorsConfig(BaseSettings):
+    origins: list[str]
+    methods: list[str]
+    headers: list[str]
+    credentials: list[str]
+
+class ServerConfig(BaseSettings):
+    host: str
+    port: int
+    uvicorn_workers: int
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="SERVER_",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
 class Settings(BaseSettings):
+    server: ServerConfig
     db: DatabaseConfig
-    jwt: AuthXConfig
+    jwt: JWTConfig
     api: PrefixConfig
     log: LoggingConfig
     smtp: SmtpConfig
+    cors: CorsConfig
 
-env_settings = EnvConfig()
 
 settings = Settings(
-    db=DatabaseConfig(
-        username=env_settings.DB_USERNAME,
-        password=env_settings.DB_PASSWORD,
-        host=env_settings.DB_HOST,
-        port=env_settings.DB_PORT,
-        name=env_settings.DB_NAME,
-        pool_size=env_settings.POOL_SIZE,
-        max_overflow=env_settings.MAX_OVERFLOW,
-        echo=False,
-        echo_pool=False,
-    ),
-    jwt=AuthXConfig(
-        JWT_ALGORITHM="RS256",
-        JWT_TOKEN_LOCATION=["headers"],
-        JWT_ACCESS_TOKEN_EXPIRES=timedelta(minutes=15),
-        JWT_REFRESH_TOKEN_EXPIRES=timedelta(days=15),
-        JWT_PUBLIC_KEY=env_settings.JWT_PUBLIC_KEY,
-        JWT_PRIVATE_KEY=env_settings.JWT_PRIVATE_KEY,
-    ),
+    server=ServerConfig(),
+    db=DatabaseConfig(),
+    jwt=JWTConfig(),
     api=PrefixConfig(
-        v1=ApiVersion(
-            root="/v1/api/auth",
-            recovery="/v1/api/auth/recovery",
-        ),
+        v1=ApiVersion()
     ),
-    log=LoggingConfig(
-        level=env_settings.LOG_LEVEL,
-    ),
-    smtp=SmtpConfig(
-        login=env_settings.SMTP_LOGIN,
-        password=env_settings.SMTP_PASSWORD,
-        host=env_settings.SMTP_HOST,
-        port=env_settings.SMTP_PORT,
-        pool_size=env_settings.SMTP_MAX_POOL,
+    log=LoggingConfig(),
+    smtp=SmtpConfig(),
+    cors=CorsConfig(
+        origins=["*"],
+        methods=["*"],
+        headers=["*"],
+        credentials=["*"],
     ),
 )

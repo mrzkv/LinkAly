@@ -18,8 +18,8 @@ class DatabaseHelper:
 
         self.engine: AsyncEngine = create_async_engine(
             url=config.async_url,
-            echo=config.echo,
-            echo_pool=config.echo_pool,
+            echo=False,
+            echo_pool=False,
             pool_size=config.pool_size,
             max_overflow=config.max_overflow,
         )

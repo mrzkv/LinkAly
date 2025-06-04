@@ -27,7 +27,7 @@ class UserCreate(BaseModel):
 class TokenResponse(BaseModel):
     user_id: int
     access_token: str
-    refresh_token: str
+    refresh_token: str | None = None
 
 class JWKSResponse(BaseModel):
     public_key: str

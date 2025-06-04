@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Response
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+from fastapi import APIRouter
 from starlette.responses import JSONResponse
 
 from src.core.config import settings
@@ -18,12 +17,3 @@ async def ping() -> JSONResponse:
             "status": "healthy",
         },
     )
-
-# endpoint for prometheus metrics
-@router.get("/metrics")
-async def get_metrics_for_prometheus() -> Response:
-    return Response(
-        content=generate_latest(),
-        media_type=CONTENT_TYPE_LATEST,
-    )
-

@@ -1,50 +1,25 @@
-import time
-from collections.abc import Awaitable, Callable
-from typing import Any
+from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
-from fastapi import Request, Response
-from prometheus_client import Counter, Histogram
-from starlette.middleware.base import BaseHTTPMiddleware
+from src.core.config import settings
 
-type CallNext = Callable[[Request], Awaitable[Response]]
+from src.middleware.base import AbstractMiddleware
 
-request_count = Counter(
-"http_requests_total",
-"Total HTTP requests",
-["method", "endpoint", "status_code"],
-)
-request_latency = Histogram(
-"http_request_latency_seconds",
-"Request latency in seconds",
-["method", "endpoint"],
-)
 
-class PrometheusMiddleware(BaseHTTPMiddleware):
+class Prometheus(AbstractMiddleware):
     def __init__(
             self,
-            *args: tuple[Any, ...],
-            **kwargs: dict[str, Any],
+            app: FastAPI,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        self.app = app
 
-    async def dispatch(
-            self,
-            request: Request,
-            call_next: CallNext,
-    ) -> Response:
-        start_time = time.perf_counter()
-        response = await call_next(request)
-        process_time = time.perf_counter() - start_time
-
-        request_count.labels(
-            method=request.method,
-            endpoint=request.url.path,
-            status_code=response.status_code,
-        ).inc()
-
-        request_latency.labels(
-            method=request.method,
-            endpoint=request.url.path,
-        ).observe(process_time)
-
-        return response
+    def install(self) -> None:
+        (
+            Instrumentator()
+             .instrument(self.app)
+             .expose(
+                self.app,
+                endpoint=f"{settings.api.v1.root}/metrics",
+                tags=["Service"],
+            )
+        )
