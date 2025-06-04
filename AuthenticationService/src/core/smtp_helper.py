@@ -14,7 +14,7 @@ class SmtpHelper:
         self.client = SMTP(
             hostname=config.host,
             port=config.port,
-            use_tls=True,
+            use_tls=config.use_tls,
             timeout=15.0,
         )
 
@@ -27,10 +27,11 @@ class SmtpHelper:
                 except Exception as e:
                     logger.error(f"Cannot connect to SMTP server: {e}")
                 try:
-                    await client.login(
-                        self.config.login,
-                        self.config.password,
-                    )
+                    if self.config.host != 'maildev':
+                        await client.login(
+                            self.config.login,
+                            self.config.password,
+                        )
                 except Exception as e:
                     logger.error(f"Cannot login to SMTP server: {e}")
                 yield client

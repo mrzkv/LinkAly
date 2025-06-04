@@ -40,7 +40,6 @@ async def set_email(
 ) -> EmailSetResponse:
     return await service.send_verification_mail(creds, access_token)
 
-
 @router.get(
     path="/set-email/{code}",
     description="Verify confirm url and set email to user account.",

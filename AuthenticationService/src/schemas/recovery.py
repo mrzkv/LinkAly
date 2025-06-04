@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from pydantic import BaseModel, EmailStr, field_validator, model_validator
 
-from src.utils.password_validator import check_password_vulnerability
+from src.utils import check_password_vulnerability
 
 
 class EmailSetRequest(BaseModel):

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import HTTPException
 from pydantic import BaseModel, field_validator
 
-from src.utils.password_validator import check_password_vulnerability
+from src.utils import check_password_vulnerability
 
 
 class UserLogin(BaseModel):

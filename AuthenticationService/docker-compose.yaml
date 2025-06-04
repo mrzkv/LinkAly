@@ -24,7 +24,8 @@ services:
     env_file:
       src/.env.template
     depends_on:
-      - pg
+      pg:
+        condition: service_healthy
     ports:
       - "8000:8000"
     healthcheck:
@@ -61,6 +62,17 @@ services:
     networks:
       - auth-service-network
 
+  maildev:
+    image: maildev/maildev
+    container_name: auth-maildev
+    depends_on:
+      - auth_service
+    ports:
+      - "1080:1080" # Web UI
+      - "1025:1025"
+    restart: unless-stopped
+    networks:
+      - auth-service-network
 
   prometheus:
     image: prom/prometheus:latest

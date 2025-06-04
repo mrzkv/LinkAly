@@ -11,6 +11,7 @@ class SmtpConfig(BaseSettings):
     host: str
     port: int
     pool_size: int
+    use_tls: bool
 
     model_config = SettingsConfigDict(
         env_prefix="SMTP_",
