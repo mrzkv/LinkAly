@@ -76,7 +76,7 @@ async def refresh(
     description="Returns RSA256 public key",
 )
 async def json_web_key_set() -> JWKSResponse:
-    return JWKSResponse(public_key=settings.jwt.JWT_PUBLIC_KEY)
+    return JWKSResponse(public_key=settings.jwt.public_key)
 
 
 @router.get(
