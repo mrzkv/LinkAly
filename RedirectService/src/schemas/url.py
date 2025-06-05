@@ -1,6 +1,8 @@
+from urllib.parse import urlparse
+
 from fastapi import HTTPException
 from pydantic import BaseModel, Field, field_validator
-from urllib.parse import urlparse
+
 
 class SerializedUrlPair(BaseModel):
     short_url: str = Field(max_length=30)
@@ -33,3 +35,8 @@ class NewUrlPair(BaseModel):
 
 class SuccessCreateUrlPair(SerializedUrlPair):
     url_id: int
+
+class UserUrlPair(BaseModel):
+    id: int
+    short_url: str
+    real_url: str
