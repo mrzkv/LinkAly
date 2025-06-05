@@ -21,7 +21,7 @@ class UrlService:
         db_urls = await self.urldao.get(short_url=short_url)
         if not db_urls:
             raise HTTPException(status_code=404)
-        return db_urls.real_url
+        return db_urls[0].real_url
 
     async def create_new_url_pair(
             self,
