@@ -1,5 +1,6 @@
 import requests
 
+
 def get_public_key(url: str, default: str) -> str:
     """
     Function to get public key from auth-service
@@ -9,8 +10,8 @@ def get_public_key(url: str, default: str) -> str:
     :return: public_key
     """
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=20)
         return response.json()["public_key"]
 
-    except Exception as e:
+    except Exception:
         return default

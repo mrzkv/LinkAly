@@ -42,7 +42,7 @@ class UrlDAO(AbstractDAO):
             select(UrlPair)
             .where(getattr(UrlPair, column) == value),
         )
-        return result.scalars().first()
+        return result.scalars().all()
 
     async def add(
             self,
