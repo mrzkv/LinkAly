@@ -55,5 +55,5 @@ class UrlService:
                 short_url=url_pair.short_url,
                 real_url=url_pair.real_url,
             ) for url_pair in
-            await self.urldao.get(user_id=user_id)
+            await self.urldao.get(creator_id=user_id)
         ]

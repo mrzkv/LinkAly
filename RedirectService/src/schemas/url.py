@@ -14,14 +14,11 @@ class SerializedUrlPair(BaseModel):
         url = real_url.strip()
         if not url.startswith(("http://", "https://")):
             url = "http://" + url
-
         parsed = urlparse(url)
-        hostname = parsed.hostname
-
-        if not parsed.scheme or not parsed.netloc or not hostname:
+        if not parsed.scheme or not parsed.netloc or not parsed.hostname:
             raise HTTPException(status_code=400, detail="Invalid URL format")
+        return url[len(parsed.scheme) + 3:]
 
-        return url
 
 class NewUrlPair(BaseModel):
     short_url: str = Field(max_length=30)
