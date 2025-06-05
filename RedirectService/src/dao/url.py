@@ -33,7 +33,7 @@ class UrlDAO(AbstractDAO):
             raise ValueError("Only 1 positional argument is allowed")
 
         column, value = next(iter(kwargs.items()))
-        allowed_columns = {"short_url", "real_url", "id"}
+        allowed_columns = {"short_url", "real_url", "id", "creator_id"}
 
         if column not in allowed_columns:
             raise ValueError("Invalid column")
