@@ -19,7 +19,7 @@ docker compose up -d
 
 **FastAPI** docs: [localhost:8000/docs](http://localhost:8000/docs)  
 
-**MailDev**: [localhost:1025](http://localhost:1080) 
+**MailDev**: [localhost:1025](http://localhost:1025) 
 
 **Grafana**: [localhost:3000](http://localhost:3000)  
 username - root  
