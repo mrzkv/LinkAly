@@ -1,0 +1,122 @@
+services:
+  pg:
+    image: postgres:latest
+    container_name: auth-postgres
+    ports:
+      - "8312:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: root
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - auth-service-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 3s
+      retries: 10
+      timeout: 2s
+
+  auth_service:
+    build: .
+    container_name: auth-service
+    env_file:
+      src/.env.template
+    depends_on:
+      pg:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8000/v1/api/auth/health || exit 1"]
+      interval: 1s
+      retries: 10
+      start_period: 10s
+      timeout: 2s
+    networks:
+      - auth-service-network
+
+  loki:
+    image: grafana/loki:latest
+    container_name: auth-loki
+    depends_on:
+      - auth_service
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./docker/loki/loki-config.yaml:/etc/loki/local-config.yaml
+    networks:
+      - auth-service-network
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: auth-promtail
+    depends_on:
+      - auth_service
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker/promtail/promtail-config.yaml:/etc/promtail/config.yml
+    networks:
+      - auth-service-network
+
+  maildev:
+    image: maildev/maildev
+    container_name: auth-maildev
+    depends_on:
+      - auth_service
+    ports:
+      - "1080:1080" # Web UI
+      - "1025:1025"
+    restart: unless-stopped
+    networks:
+      - auth-service-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: auth-prometheus
+    depends_on:
+      - auth_service
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheusdata:/prometheus
+    networks:
+      - auth-service-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: auth-grafana
+    depends_on:
+      - prometheus
+      - loki
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=root
+      - GF_SECURITY_ADMIN_PASSWORD=root
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    volumes:
+      - ./docker/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning/dashboards:ro
+      - grafanadata:/var/lib/grafana
+    networks:
+      - auth-service-network
+
+volumes:
+  pgdata:
+    name: auth-service-pgdata
+  grafanadata:
+    name: auth-service-grafanadata
+  prometheusdata:
+    name: auth-service-prometheusdata
+
+
+networks:
+  auth-service-network:
+    name: auth-service-network
+
