@@ -12,7 +12,7 @@ from src.schemas.user import (
     UserMe,
 )
 from src.security.argon_hasher import ArgonHasher
-from src.security.jwt import AuthJWT, TokenPayload, auth_jwt
+from src.security.jwt import AuthJWT, TokenPayload
 
 
 class UserService:
@@ -23,7 +23,7 @@ class UserService:
             hasher: ArgonHasher = ArgonHasher(),
     ) -> None:
         self.repository = UsersRepository(session)
-        self.jwt = auth_jwt
+        self.jwt = jwt
         self.hasher = hasher
 
     async def register_user(self, user: UserCreate) -> TokenResponse:

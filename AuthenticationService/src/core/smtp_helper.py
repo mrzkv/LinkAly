@@ -27,7 +27,7 @@ class SmtpHelper:
                 except Exception as e:
                     logger.error(f"Cannot connect to SMTP server: {e}")
                 try:
-                    if self.config.host != 'maildev':
+                    if self.config.host != "maildev":
                         await client.login(
                             self.config.login,
                             self.config.password,

@@ -110,7 +110,7 @@ class RecoveryService:
             email=data.email,
             confirm_type="password_change",
         )
-        verify_link = f"http://{env_settings.IP_ADDRESS}:{env_settings.PORT}{settings.api.v1.recovery}/forgot-password/{confirm_token}"
+        verify_link = f"http://{settings.server.host}:{settings.server.port}{settings.api.v1.recovery}/forgot-password/{confirm_token}"
         body = (f"Hello, its LinkAly verification mail.\n"
                 f"Click this link to change your password.\n"
                 f"link: {verify_link}\n")

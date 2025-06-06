@@ -127,7 +127,7 @@ settings = Settings(
     db=DatabaseConfig(),
     jwt=JWTConfig(),
     api=PrefixConfig(
-        v1=ApiVersion()
+        v1=ApiVersion(),
     ),
     log=LoggingConfig(),
     smtp=SmtpConfig(),

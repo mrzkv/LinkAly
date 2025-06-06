@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.core.config import settings
-
 from src.middleware.base import AbstractMiddleware
 
 
