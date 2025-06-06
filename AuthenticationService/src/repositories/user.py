@@ -1,7 +1,7 @@
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repositories.base_repository import AbstractRepository
+from src.repositories.base import AbstractRepository
 from src.schemas.user import SerializedUser
 from src.tables.user import User
 

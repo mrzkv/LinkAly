@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from src.core.config import settings
-from src.dependencies.services_depends import get_recovery_service
-from src.dependencies.token_depends import get_access_token
+from src.dependencies.service import get_recovery_service
+from src.dependencies.token import get_access_token
 from src.schemas.recovery import (
     EmailSetRequest,
     EmailSetResponse,

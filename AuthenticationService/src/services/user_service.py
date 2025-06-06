@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
 from src.core.logging_promtail import logger
-from src.repositories.user_repository import UsersRepository
+from src.repositories.user import UsersRepository
 from src.schemas.user import (
     SerializedUser,
     TokenResponse,

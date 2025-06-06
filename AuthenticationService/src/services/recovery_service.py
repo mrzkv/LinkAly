@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
 from src.core.logging_promtail import logger
-from src.repositories.smtp_repository import SMTPRepository
-from src.repositories.user_repository import UsersRepository
+from src.repositories.smtp import SMTPRepository
+from src.repositories.user import UsersRepository
 from src.schemas.recovery import (
     EmailSetRequest,
     EmailSetResponse,
