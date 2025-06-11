@@ -1,13 +1,14 @@
-FROM python:3.13-slim
+FROM python:3.13-bookworm
 
 WORKDIR /app
 
-COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml .
+RUN pip install uv && uv pip install . --system
 
 COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["bash", "-c", "alembic upgrade head && python3 src/main.py"]
+RUN chmod +x src/entrypoint.sh
+
+ENTRYPOINT ["src/entrypoint.sh"]
